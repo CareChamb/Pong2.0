@@ -1,8 +1,6 @@
 import random
 import time
 import threading
-from time import sleep
-
 from sense_hat import SenseHat
 import Ball
 import Board
@@ -10,6 +8,7 @@ import Paddle
 
 sense = SenseHat()
 
+#Deffualt game class
 class Game:
     def __init__(self):
         self.board = Board.GameBoard()
@@ -19,6 +18,7 @@ class Game:
         self.stop_threads = False
         self.win_con = 0
 
+    #Function to loop game (Runs in a thread at the bottom)
     def game_loop(self):
         while not self.stop_threads:
             self.board.set_bg()
@@ -27,6 +27,8 @@ class Game:
             time.sleep(0.05)
             self.board.clear()
 
+
+    #Function to check ball position and adjust sleep_time/wincon
     def ball_loop(self):
         self.ball.move(self.paddle.paddle)
         if self.ball.getposition()[0] == 6 and (self.paddle.paddle - 1) <= self.ball.getposition()[1] <= (self.paddle.paddle + 1):
@@ -35,14 +37,15 @@ class Game:
                 print(self.sleep_time)
             if self.sleep_time < 0.2:
                 Game.win_con(self)
-
         time.sleep(self.sleep_time)
         return self.game_end()
 
+
+    #Functions get game ending
     def game_end(self):
-        if self.ball.position[0] == 8: ######################### Lose con
+        if self.ball.position[0] == 8:                      # Lose con
             return 2
-        elif self.win_con >= 4: ################################ Win con
+        elif self.win_con >= 4:                             # Win con
             return 1
         return 0
 
@@ -60,6 +63,8 @@ class Game:
         self.win_con += 1
         print(self.win_con)
 
+
+    #Function to draw ending spiral
     def draw_box(self, color):
         spiral = [
             (0,0), (1,0), (2,0), (3,0), (4,0), (5,0), (6,0), (7,0),
@@ -81,6 +86,8 @@ class Game:
             sense.set_pixel(pos[0], pos[1], color)
             time.sleep(0.01)
 
+
+    #Function to flip a coin
     def get_random_increment(self):
         num = random.randint(0, 1)
         return num
@@ -101,9 +108,9 @@ class MPGameRight(Game):
         self.ball.move(self.paddle.paddle)
         if self.ball.getposition()[0] == 0: ########################## Send Ball to other screen Con
             print(self.ball.getposition(), self.ball.getvelocity(), self.sleep_time)
-
-
-
+            #
+            # This is the stuff that will happen when the ball go's off-screen.
+            #
         if self.ball.getposition()[0] == 6 and (self.paddle.paddle - 1) <= self.ball.getposition()[1] <= (
                 self.paddle.paddle + 1):
             if self.get_random_increment() == 1 and self.sleep_time > 0.1:
@@ -115,7 +122,7 @@ class MPGameRight(Game):
         time.sleep(self.sleep_time)
         return self.game_end()
 
-
+#Class for Multiplayer game left side
 class MPGameLeft(Game):
     def __init__(self):
         super().__init__()
@@ -130,9 +137,9 @@ class MPGameLeft(Game):
         self.ball.move(self.paddle.paddle)
         if self.ball.getposition()[0] == 7: ########################## Send Ball to other screen Con
             print(self.ball.getposition(), self.ball.getvelocity(), self.sleep_time)
-
-
-
+            #
+            # This is the stuff that will happen when the ball go's off-screen.
+            #
         if self.ball.getposition()[0] == 1 and (self.paddle.paddle - 1) <= self.ball.getposition()[1] <= (
                 self.paddle.paddle + 1):
             if self.get_random_increment() == 1 and self.sleep_time > 0.1:
@@ -144,7 +151,6 @@ class MPGameLeft(Game):
         time.sleep(self.sleep_time)
         return self.game_end()
 
-# Initialize the game
 
 def main():
 
@@ -189,12 +195,12 @@ def main():
         sense.clear()
 
 
+    #Ask player for game type
     print("Welcome to Pi-Pong 2.0")
     gametype = game_type(input("Which game type would you like to play? (S for Single or M for Multi): ").upper())
 
 
-
-    # Run Game
+    #Run
     #Game Type: Single player
     if gametype == 0:
         count_down()
@@ -219,7 +225,7 @@ def main():
                 game.game_lose()
 
 
-    #Run Game
+    #Run
     #Game Type: Multiplayer (Left side)
     elif gametype == 1:
         count_down()
@@ -242,7 +248,7 @@ def main():
                 thread2.join()
                 game.game_lose()
 
-    #Run Game
+    #Run
     #Game Type: Multiplayer (Right side)
     elif gametype == 2:
         count_down()

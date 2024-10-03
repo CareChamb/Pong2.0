@@ -4,11 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4630345b-5509-4c12-a326-a5dbc740a621" name="Changes" comment="first 2.0">
+    <list default="true" id="4630345b-5509-4c12-a326-a5dbc740a621" name="Changes" comment="added left side option">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Ball.py" beforeDir="false" afterPath="$PROJECT_DIR$/Ball.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/GameMain.py" beforeDir="false" afterPath="$PROJECT_DIR$/GameMain.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Paddle.py" beforeDir="false" afterPath="$PROJECT_DIR$/Paddle.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -86,7 +84,7 @@
       <workItem from="1727804208408" duration="62000" />
       <workItem from="1727804283175" duration="55000" />
       <workItem from="1727804372258" duration="11981000" />
-      <workItem from="1727960815274" duration="12802000" />
+      <workItem from="1727960815274" duration="13966000" />
     </task>
     <task id="LOCAL-00001" summary="first 2.0">
       <option name="closed" value="true" />
@@ -120,7 +118,15 @@
       <option name="project" value="LOCAL" />
       <updated>1727968852006</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="added left side option">
+      <option name="closed" value="true" />
+      <created>1727975995010</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1727975995010</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -128,7 +134,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="first 2.0" />
-    <option name="LAST_COMMIT_MESSAGE" value="first 2.0" />
+    <MESSAGE value="added left side option" />
+    <option name="LAST_COMMIT_MESSAGE" value="added left side option" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/Pong2_0$Ball.coverage" NAME="Ball Coverage Results" MODIFIED="1727804398227" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
