@@ -33,14 +33,11 @@ class Ball:
         if self.position[0] == 6 and (paddle_position - 1) <= self.position[1] <= (paddle_position + 1):
             self.velocity[0] = -self.velocity[0]
 
-class MPBall(Ball):
+class BallLeft(Ball):
     def __init__(self):
         super().__init__()
 
     def move(self, paddle_position):
-
-
-
         self.position[0] += self.velocity[0]
         if self.position[0] == 7 or self.position[0] == 0:
             self.velocity[0] = -self.velocity[0]
@@ -49,7 +46,5 @@ class MPBall(Ball):
         if self.position[1] == 7 or self.position[1] == 0:
             self.velocity[1] = -self.velocity[1]
 
-        if self.position[0] == 6 and (paddle_position - 1) <= self.position[1] <= (paddle_position + 1):
+        if self.position[0] == 1 and (paddle_position - 1) <= self.position[1] <= (paddle_position + 1):
             self.velocity[0] = -self.velocity[0]
-
-

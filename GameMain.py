@@ -15,7 +15,6 @@ class Game:
         self.board = Board.GameBoard()
         self.paddle = Paddle.Paddle()
         self.ball = Ball.Ball()
-        self.mp_ball = Ball.MPBall()
         self.sleep_time = 0.5
         self.stop_threads = False
         self.win_con = 0
@@ -86,17 +85,19 @@ class Game:
         num = random.randint(0, 1)
         return num
 
-class MPGame(Game):
+
+#Class for Multiplayer game right side
+class MPGameRight(Game):
     def __init__(self):
         super().__init__()
         self.board = Board.GameBoard()
         self.paddle = Paddle.Paddle()
-        self.ball = Ball.MPBall()
+        self.ball = Ball.Ball()
         self.sleep_time = 0.5
         self.stop_threads = False
         self.win_con = 0
 
-    def mpball_loop(self):
+    def mpball_loop_right(self):
         self.ball.move(self.paddle.paddle)
         if self.ball.getposition()[0] == 0: ########################## Send Ball to other screen Con
             print(self.ball.getposition(), self.ball.getvelocity(), self.sleep_time)
@@ -115,18 +116,51 @@ class MPGame(Game):
         return self.game_end()
 
 
+class MPGameLeft(Game):
+    def __init__(self):
+        super().__init__()
+        self.board = Board.GameBoard()
+        self.paddle = Paddle.PaddleLeft()
+        self.ball = Ball.BallLeft()
+        self.sleep_time = 0.5
+        self.stop_threads = False
+        self.win_con = 0
+
+    def mpball_loop_left(self):
+        self.ball.move(self.paddle.paddle)
+        if self.ball.getposition()[0] == 7: ########################## Send Ball to other screen Con
+            print(self.ball.getposition(), self.ball.getvelocity(), self.sleep_time)
+
+
+
+        if self.ball.getposition()[0] == 1 and (self.paddle.paddle - 1) <= self.ball.getposition()[1] <= (
+                self.paddle.paddle + 1):
+            if self.get_random_increment() == 1 and self.sleep_time > 0.1:
+                self.sleep_time = round(self.sleep_time - 0.1, 1)
+                print(self.sleep_time)
+            if self.sleep_time < 0.2:
+                Game.win_con(self)
+
+        time.sleep(self.sleep_time)
+        return self.game_end()
 
 # Initialize the game
 
 def main():
 
-
-    def game_type(input):
-        if input == "S":
+    #Function to return game type
+    def game_type(response):
+        if response == "S":
             return 0
-        if input == "M":
-            return 1
+        elif response == "M":
+            response = input("Select Player (L for left -- R for right) ").upper()
+            if response == "L":
+                return 1
+            elif response == "R":
+                return 2
 
+
+    #Function to display countdown
     def count_down():
         white = (255,255,255)
         three = [
@@ -156,9 +190,12 @@ def main():
 
 
     print("Welcome to Pi-Pong 2.0")
-    gametype = game_type(input("Which game type would you like to play? S for Single or M for Multi").upper())
+    gametype = game_type(input("Which game type would you like to play? (S for Single or M for Multi): ").upper())
 
 
+
+    # Run Game
+    #Game Type: Single player
     if gametype == 0:
         count_down()
         game = Game()
@@ -182,9 +219,11 @@ def main():
                 game.game_lose()
 
 
+    #Run Game
+    #Game Type: Multiplayer (Left side)
     elif gametype == 1:
         count_down()
-        game = MPGame()
+        game = MPGameLeft()
         sense.stick.direction_up = game.paddle.move_up
         sense.stick.direction_down = game.paddle.move_down
         # Run the game loop in a separate thread
@@ -192,7 +231,30 @@ def main():
         thread2.start()
 
         while game.game_end() == 0:
-            result = game.mpball_loop()
+            result = game.mpball_loop_left()
+
+            if result == 1:
+                game.stop_threads = True
+                thread2.join()
+                game.game_win()
+            elif result == 2:
+                game.stop_threads = True
+                thread2.join()
+                game.game_lose()
+
+    #Run Game
+    #Game Type: Multiplayer (Right side)
+    elif gametype == 2:
+        count_down()
+        game = MPGameRight()
+        sense.stick.direction_up = game.paddle.move_up
+        sense.stick.direction_down = game.paddle.move_down
+        # Run the game loop in a separate thread
+        thread2 = threading.Thread(target=game.game_loop)
+        thread2.start()
+
+        while game.game_end() == 0:
+            result = game.mpball_loop_right()
 
             if result == 1:
                 game.stop_threads = True
