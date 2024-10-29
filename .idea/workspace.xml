@@ -4,8 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4630345b-5509-4c12-a326-a5dbc740a621" name="Changes" comment="added left side option">
+    <list default="true" id="4630345b-5509-4c12-a326-a5dbc740a621" name="Changes" comment="Comments">
+      <change afterPath="$PROJECT_DIR$/CLEAR.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Listen.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Send.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Ball.py" beforeDir="false" afterPath="$PROJECT_DIR$/Ball.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/GameMain.py" beforeDir="false" afterPath="$PROJECT_DIR$/GameMain.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -23,18 +28,18 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "CareChamb"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;CareChamb&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "git@github.com:CareChamb/Pong2.0.git",
-    "accountId": "ed25ead4-2472-4814-8ff1-63ee9c63e3c0"
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;git@github.com:CareChamb/Pong2.0.git&quot;,
+    &quot;accountId&quot;: &quot;ed25ead4-2472-4814-8ff1-63ee9c63e3c0&quot;
   }
-}]]></component>
+}</component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 4
 }</component>
@@ -84,7 +89,14 @@
       <workItem from="1727804208408" duration="62000" />
       <workItem from="1727804283175" duration="55000" />
       <workItem from="1727804372258" duration="11981000" />
-      <workItem from="1727960815274" duration="13966000" />
+      <workItem from="1727960815274" duration="24716000" />
+      <workItem from="1728393943557" duration="21979000" />
+      <workItem from="1728421105227" duration="302000" />
+      <workItem from="1728998243601" duration="25526000" />
+      <workItem from="1729170495299" duration="23437000" />
+      <workItem from="1729776089237" duration="20418000" />
+      <workItem from="1730207233545" duration="10123000" />
+      <workItem from="1730220514925" duration="3056000" />
     </task>
     <task id="LOCAL-00001" summary="first 2.0">
       <option name="closed" value="true" />
@@ -126,7 +138,15 @@
       <option name="project" value="LOCAL" />
       <updated>1727975995010</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="Comments">
+      <option name="closed" value="true" />
+      <created>1727976790728</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1727976790728</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -135,7 +155,8 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="first 2.0" />
     <MESSAGE value="added left side option" />
-    <option name="LAST_COMMIT_MESSAGE" value="added left side option" />
+    <MESSAGE value="Comments" />
+    <option name="LAST_COMMIT_MESSAGE" value="Comments" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/Pong2_0$Ball.coverage" NAME="Ball Coverage Results" MODIFIED="1727804398227" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
