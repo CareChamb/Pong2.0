@@ -5,15 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="4630345b-5509-4c12-a326-a5dbc740a621" name="Changes" comment="Comments">
-      <change afterPath="$PROJECT_DIR$/Menu.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Ball.py" beforeDir="false" afterPath="$PROJECT_DIR$/Ball.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CLEAR.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/GameMain.py" beforeDir="false" afterPath="$PROJECT_DIR$/GameMain.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Listen.py" beforeDir="false" afterPath="$PROJECT_DIR$/Listen.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Paddle.py" beforeDir="false" afterPath="$PROJECT_DIR$/Paddle.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Send.py" beforeDir="false" afterPath="$PROJECT_DIR$/Send.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -107,6 +99,7 @@
       <workItem from="1731424372420" duration="22604000" />
       <workItem from="1731594324347" duration="1579000" />
       <workItem from="1731596445612" duration="17868000" />
+      <workItem from="1732038089488" duration="1929000" />
     </task>
     <task id="LOCAL-00001" summary="first 2.0">
       <option name="closed" value="true" />
