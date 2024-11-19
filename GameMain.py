@@ -24,8 +24,8 @@ class Game:
         self.stop_threads = False
         self.win_con = 0
         self.ending = 0
-        self.localip = ("10.41.10.55")
-        self.remoteip = ("10.41.10.52")
+        self.RIGHTPI_IP = ("10.41.10.55")
+        self.LEFTPI_IP = ("10.41.10.52")
 
 
     #Function to loop game (Runs in a thread at the bottom)
@@ -96,14 +96,14 @@ class Game:
     def game_end(self):
         if self.ball.getposition()[0] == 7:  # Lose condition
             print("Right player loses.")
-            self.send = Send.Send(str(["END", 2]), (self.localip, 1777))  # Send loss message
+            self.send = Send.Send(str(["END", 2]), (self.RIGHTPI_IP, 1777))  # Send loss message
             time.sleep(.5)
             self.stop_threads = True  # Stop threads to prevent further actions
             time.sleep(.5)
             return 2
         elif self.win_con >= 5:  # Win condition
             print("Right player wins.")
-            self.send = Send.Send(str(["END", 1]), (self.localip, 1777))  # Send win message to other player
+            self.send = Send.Send(str(["END", 1]), (self.RIGHTPI_IP, 1777))  # Send win message to other player
             time.sleep(.5)
             self.stop_threads = True  # Stop threads to prevent further actions
             time.sleep(.5)
@@ -115,13 +115,13 @@ class Game:
     def game_end_left(self):
         if self.ball.getposition()[0] == 0:  # Lose condition
             print("Left player loses.")
-            self.send = Send.Send(str(["END", 2]), (self.remoteip, 1888))  # Send loss message
+            self.send = Send.Send(str(["END", 2]), (self.LEFTPI_IP, 1888))  # Send loss message
             self.stop_threads = True  # Stop threads to prevent further actions
             self.game_lose()  # Display loss screen
             return 2
         elif self.win_con >= 5:  # Win condition
             print("Left player wins.")
-            self.send = Send.Send(str(["END", 1]), (self.remoteip, 1888))  # Send win message to other player
+            self.send = Send.Send(str(["END", 1]), (self.LEFTPI_IP, 1888))  # Send win message to other player
             self.stop_threads = True  # Stop threads to prevent further actions
             self.game_win()  # Display win screen
             return 1
@@ -243,8 +243,8 @@ class MPGameRight(Game):
 
                 ball_data = [send_position, send_velocity, self.sleep_time, self.ending]
                 print(f"Sending ball data from right to left: {ball_data}")
-                self.send = Send.Send(str(ball_data), (self.localip, 1777))
-                listen(self, self.remoteip, 1888)
+                self.send = Send.Send(str(ball_data), (self.RIGHTPI_IP, 1777))
+                listen(self, self.LEFTPI_IP, 1888)
                 self.ball.frozen = False
                 self.ball.opposite_side = False  # Reset opposite side bouncing
 
@@ -279,8 +279,8 @@ class MPGameLeft(Game):
 
                 ball_data = [send_position, send_velocity, self.sleep_time, self.ending]
                 print(f"Sending ball data from left to right: {ball_data}")
-                self.send = Send.Send(str(ball_data), (self.remoteip, 1888))
-                listen(self, self.localip, 1777)
+                self.send = Send.Send(str(ball_data), (self.LEFTPI_IP, 1888))
+                listen(self, self.RIGHTPI_IP, 1777)
                 self.ball.frozen = False
                 self.ball.opposite_side = False  # Reset opposite side bouncing after listening
 

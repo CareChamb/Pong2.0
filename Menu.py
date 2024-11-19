@@ -7,8 +7,8 @@ import threading
 sense = SenseHat()
 
 #constants
-CPI_IP = "10.41.10.52"
-NPI_IP = "10.41.10.55"
+RIGHTPI_IP = "10.41.10.52"
+LEFTPI_IP = "10.41.10.55"
 PORT = 65432
 
 
@@ -106,11 +106,11 @@ class Menu:
         message = "False"
 
         # Check if this machine is CPI or NPI based on IP
-        if self.local_ip == CPI_IP:
+        if self.local_ip == RIGHTPI_IP:
             for i in range(2):
                 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-                    s.bind((CPI_IP, PORT))
+                    s.bind((RIGHTPI_IP, PORT))
                     s.listen(1)
                     s.settimeout(2)
                     print(f"Listening for data... attempt {i + 1}")
@@ -136,22 +136,22 @@ class Menu:
                 smessage = "True"
                 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                     try:
-                        s.connect((NPI_IP, PORT))
+                        s.connect((LEFTPI_IP, PORT))
                         s.sendall(smessage.encode())
-                        print("Message sent to NPI_IP")
+                        print("Message sent to LEFTPI_IP")
                         print("Both machines are synchronized! Starting the game.")
                         self.connection_established = True
                         self.waiting_thread.join()  # Stop the waiting message
                         return
                     except socket.error as e:
-                        print(f"Connection to NPI_IP failed: {e}, retrying...")
+                        print(f"Connection to LEFTPI_IP failed: {e}, retrying...")
                     time.sleep(2)
 
-        elif self.local_ip == NPI_IP:
+        elif self.local_ip == LEFTPI_IP:
             for i in range(2):
                 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-                    s.bind((NPI_IP, PORT))
+                    s.bind((LEFTPI_IP, PORT))
                     s.listen(1)
                     s.settimeout(2)
                     print(f"Listening for data... attempt {i + 1}")
@@ -177,15 +177,15 @@ class Menu:
                 smessage = "True"
                 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                     try:
-                        s.connect((CPI_IP, PORT))
+                        s.connect((RIGHTPI_IP, PORT))
                         s.sendall(smessage.encode())
-                        print("Message sent to CPI_IP")
+                        print("Message sent to RIGHTPI_IP")
                         print("Both machines are synchronized! Starting the game.")
                         self.connection_established = True
                         self.waiting_thread.join()  # Stop the waiting message
                         return
                     except socket.error as e:
-                        print(f"Connection to CPI_IP failed: {e}, retrying...")
+                        print(f"Connection to RIGHTPI_IP failed: {e}, retrying...")
                     time.sleep(2)
 
     def run_menu(self):
