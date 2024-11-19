@@ -1,6 +1,5 @@
 # Pi Pong 2.0
 ## A game of battle pong played between 2 raspberry pi's using the Sense HAT LED display.
-### Writen by *Caroline Chamberlain*
 ### Set Up Instructions
 *At the moment you must change the Ip's set in the proram the match the corasponding ip's of the pi's playing the game.*
 ```
@@ -27,4 +26,8 @@ LEFTPI_IP = "10.41.10.??"
 - Every time the ball hits a paddle it has a 50% chance for the ball to speed up.
 - Once the ball is at its top speed and the ball hits a players paddle, that player will gain a  point.
 - Once a player has reached 5 pionts that player wins and the other player loses.
+
+
+  
+ Writen by *Caroline Chamberlain*
     
