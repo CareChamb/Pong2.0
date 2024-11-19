@@ -4,9 +4,10 @@ sense = SenseHat()
 
 class Ball:
     def __init__(self):
-        self.position = [3, 3]  # Starting position
-        self.velocity = [-1, 1]  # Initial velocity
+        self.position = [1, 3]  # Starting position
+        self.velocity = [1, 1]  # Initial velocity
         self.frozen = False
+        self.opposite_side = False
 
     def getposition(self):
         return self.position
@@ -30,57 +31,73 @@ class Ball:
         color = self.get_random_color()
         sense.set_pixel(self.position[0], self.position[1], color)
 
+    def bounce_opposite_side(self):
+        if self.opposite_side:
+            self.position[0] = 1  # Set to the far side away from paddle
+            self.position[1] += self.velocity[1]
+            if self.position[1] == 7 or self.position[1] == 0:
+                self.velocity[1] = -self.velocity[1]
+
     def move(self, paddle_position):
-        # Move Y position only if frozen, skip X updates
         if not self.frozen:
+            # Move the ball in x direction
             self.position[0] += self.velocity[0]
-            if self.position[0] == 7 or self.position[0] == 0:
+
+            # Check for wall collisions on x-axis
+            if self.position[0] >= 7 or self.position[0] <= 0:
                 self.velocity[0] = -self.velocity[0]
 
-        self.position[1] += self.velocity[1]
-        if self.position[1] == 7 or self.position[1] == 0:
-            self.velocity[1] = -self.velocity[1]
+            # Move the ball in y direction
+            self.position[1] += self.velocity[1]
 
-        if self.position[0] == 6 and (paddle_position - 1) <= self.position[1] <= (paddle_position + 1):
-            self.velocity[0] = -self.velocity[0]
-    # def move(self, paddle_position):
-    #     self.position[0] += self.velocity[0]
-    #     if self.position[0] == 7 or self.position[0] == 0:
-    #         self.velocity[0] = -self.velocity[0]
-    #
-    #     self.position[1] += self.velocity[1]
-    #     if self.position[1] == 7 or self.position[1] == 0:
-    #         self.velocity[1] = -self.velocity[1]
-    #
-    #     if self.position[0] == 6 and (paddle_position - 1) <= self.position[1] <= (paddle_position + 1):
-    #         self.velocity[0] = -self.velocity[0]
+            # Check for wall collisions on y-axis
+            if self.position[1] >= 7 or self.position[1] <= 0:
+                self.velocity[1] = -self.velocity[1]
 
-    def clear_pixel(self):
-        """Set the ball's current pixel to the background color."""
-        sense.set_pixel(self.position[0], self.position[1], [0, 0, 0])
+            # Right paddle collision detection
+            if self.position[0] == 6:
+                if (paddle_position - 1) <= self.position[1] <= (paddle_position + 1):
+                    self.velocity[0] = -self.velocity[0]
+                elif self.position[1] == (paddle_position + 2) or self.position[1] == (paddle_position - 2):
+                    self.velocity[0] = -self.velocity[0]
+                    self.velocity[1] = -self.velocity[1]
+        else:
+            self.bounce_opposite_side()  # Bounce on the far side if frozen
+
 
 class BallLeft(Ball):
     def __init__(self):
         super().__init__()
 
-        def move(self, paddle_position):
-            if not self.frozen:  # Respect frozen state for X position
-                self.position[0] += self.velocity[0]
-                if self.position[0] == 7 or self.position[0] == 0:
-                    self.velocity[0] = -self.velocity[0]
-
+    def bounce_opposite_side(self):
+        if self.opposite_side:
+            self.position[0] = 6  # Set to the far side away from paddle
             self.position[1] += self.velocity[1]
             if self.position[1] == 7 or self.position[1] == 0:
                 self.velocity[1] = -self.velocity[1]
 
-    # def move(self, paddle_position):
-    #     self.position[0] += self.velocity[0]
-    #     if self.position[0] == 7 or self.position[0] == 0:
-    #         self.velocity[0] = -self.velocity[0]
-    #
-    #     self.position[1] += self.velocity[1]
-    #     if self.position[1] == 7 or self.position[1] == 0:
-    #         self.velocity[1] = -self.velocity[1]
-    #
-    #     if self.position[0] == 1 and (paddle_position - 1) <= self.position[1] <= (paddle_position + 1):
-    #         self.velocity[0] = -self.velocity[0]
+    def move(self, paddle_position):
+        if not self.frozen:
+            # Move the ball in x direction
+            self.position[0] += self.velocity[0]
+
+            # Check for wall collisions on x-axis
+            if self.position[0] >= 7 or self.position[0] <= 0:
+                self.velocity[0] = -self.velocity[0]
+
+            # Move the ball in y direction
+            self.position[1] += self.velocity[1]
+
+            # Check for wall collisions on y-axis
+            if self.position[1] >= 7 or self.position[1] <= 0:
+                self.velocity[1] = -self.velocity[1]
+
+            # Left paddle collision detection
+            if self.position[0] == 1:
+                if (paddle_position - 1) <= self.position[1] <= (paddle_position + 1):
+                    self.velocity[0] = -self.velocity[0]
+                elif self.position[1] == (paddle_position + 2) or self.position[1] == (paddle_position - 2):
+                    self.velocity[0] = -self.velocity[0]
+                    self.velocity[1] = -self.velocity[1]
+        else:
+            self.bounce_opposite_side()  # Bounce on the far side if frozen

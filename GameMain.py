@@ -7,40 +7,59 @@ import Board
 import Paddle
 import Send
 import Listen
+from Menu import Menu
 
 
 sense = SenseHat()
 
-
 #Deffualt game class
 class Game:
     def __init__(self):
+
         self.board = Board.GameBoard()
         self.paddle = Paddle.Paddle()
         self.ball = Ball.Ball()
-        self.sleep_time = 1
+
+        self.sleep_time = .5
         self.stop_threads = False
         self.win_con = 0
-        self.address = ("10.41.10.50")
-        self.address2 = ("10.41.10.68")
-        self.resume_game_event = threading.Event()  # Event to control the game loop pause and resume
-        self.resume_game_event.set()
+        self.ending = 0
+        self.localip = ("10.41.10.55")
+        self.remoteip = ("10.41.10.52")
 
 
-        #Function to loop game (Runs in a thread at the bottom)
+    #Function to loop game (Runs in a thread at the bottom)
     def game_loop(self):
+        self.board.set_bg()  # Set background
+        time.sleep(0.1)  # Small delay to ensure the paddle is visible
+        self.paddle.draw()  # Draw paddle position
+
+        last_position = self.ball.getposition()  # Track last ball position
         while not self.stop_threads:
-            self.resume_game_event.wait()  # Wait until the ball returns
-            self.board.set_bg()
-            self.paddle.draw()
-            self.ball.draw()
-            time.sleep(0.5)
-            #self.board.clear()
+            self.board.set_bg()  # Clear and reset the background
+            # Get the current position
+            current_position = self.ball.getposition()
+
+
+            # Draw the ball at the current position
+            sense.set_pixel(int(current_position[0]), int(current_position[1]), self.ball.get_random_color())
+
+            # Update the last position to the current position
+            self.paddle.draw()  # Draw paddle position
+
+            time.sleep(0.05)  # Faster display rate for smooth visuals
 
 
     def ball_move(self):
         while not self.stop_threads:
             self.ball.move(self.paddle.paddle)
+
+            if self.ball.getposition()[0] == 6 and (self.paddle.paddle - 1) <= self.ball.getposition()[1] <= (
+                    self.paddle.paddle + 1):
+                if self.get_random_increment() == 1 and self.sleep_time > 0.1:
+                    self.sleep_time = round(self.sleep_time - 0.1, 1)
+                    print(self.sleep_time)
+
             time.sleep(self.sleep_time)
 
 
@@ -50,20 +69,65 @@ class Game:
         if self.ball.getposition()[0] == 6 and (self.paddle.paddle - 1) <= self.ball.getposition()[1] <= (self.paddle.paddle + 1):
             if self.get_random_increment() == 1 and self.sleep_time > 0.1:
                 self.sleep_time = round(self.sleep_time - 0.1,1)
-                print(self.sleep_time)
+                print(f"SLEEP TIME DECREASE  {self.sleep_time}")
             if self.sleep_time < 0.2:
                 Game.win_con(self)
+                print(f"WIN CON INCREASE  {self.win_con}")
+
         time.sleep(self.sleep_time)
+
         return self.game_end()
 
+    def ball_loop_Left(self):
+
+        if self.ball.getposition()[0] == 1 and (self.paddle.paddle - 1) <= self.ball.getposition()[1] <= (self.paddle.paddle + 1):
+            if self.get_random_increment() == 1 and self.sleep_time > 0.1:
+                self.sleep_time = round(self.sleep_time - 0.1,1)
+                print(f"SLEEP TIME DECREASE  {self.sleep_time}")
+            if self.sleep_time < 0.2:
+                Game.win_con(self)
+                print(f"WIN CON INCREASE  {self.win_con}")
+
+        time.sleep(self.sleep_time)
+
+        return self.game_end_left()
 
     #Functions get game ending
     def game_end(self):
-        if self.ball.position[0] == 8:                      # Lose con
+        if self.ball.getposition()[0] == 7:  # Lose condition
+            print("Right player loses.")
+            self.send = Send.Send(str(["END", 2]), (self.localip, 1777))  # Send loss message
+            time.sleep(.5)
+            self.stop_threads = True  # Stop threads to prevent further actions
+            time.sleep(.5)
             return 2
-        elif self.win_con >= 4:                             # Win con
+        elif self.win_con >= 5:  # Win condition
+            print("Right player wins.")
+            self.send = Send.Send(str(["END", 1]), (self.localip, 1777))  # Send win message to other player
+            time.sleep(.5)
+            self.stop_threads = True  # Stop threads to prevent further actions
+            time.sleep(.5)
             return 1
-        return 0
+        else:
+            return 0  # Continue game
+
+
+    def game_end_left(self):
+        if self.ball.getposition()[0] == 0:  # Lose condition
+            print("Left player loses.")
+            self.send = Send.Send(str(["END", 2]), (self.remoteip, 1888))  # Send loss message
+            self.stop_threads = True  # Stop threads to prevent further actions
+            self.game_lose()  # Display loss screen
+            return 2
+        elif self.win_con >= 5:  # Win condition
+            print("Left player wins.")
+            self.send = Send.Send(str(["END", 1]), (self.remoteip, 1888))  # Send win message to other player
+            self.stop_threads = True  # Stop threads to prevent further actions
+            self.game_win()  # Display win screen
+            return 1
+        else:
+            return 0  # Continue game
+
 
     def game_win(self):
         self.draw_box([0, 255, 0])
@@ -76,7 +140,7 @@ class Game:
         sense.show_message("LOSER!!!", text_colour=[255, 0, 0])
 
     def win_con(self):
-        self.win_con += 1
+        self.win_con = 1
         print(self.win_con)
 
 
@@ -109,16 +173,25 @@ class Game:
         return num
 
 
-
-
-
-def listen(self,address,port):
+def listen(self, address, port):
     received_data = None
     while received_data is None:
         self.listen = Listen.Server((address, port))
         received_data = self.listen.WaitForConnection()
+        print(f"Raw received data: {received_data}")
 
-    print(f"Raw received data: {received_data}")
+    if received_data == "['END', 1]":
+        print("Received end-game signal. Opponent has won.")
+        self.stop_threads = True
+        self.game_lose()  # Show loss screen
+        return  # Exit immediately
+
+    elif received_data == "['END', 2]":
+        print("Received end-game signal. Opponent has lost.")
+        self.stop_threads = True
+        self.game_win()  # Show win screen
+        return  # Exit immediately
+
 
     try:
         # Assuming the data is sent as a list [position, velocity, sleep_time]
@@ -126,6 +199,7 @@ def listen(self,address,port):
         position = received_data[0]
         velocity = received_data[1]
         self.sleep_time = received_data[2]
+
 
         print(f"Parsed position: {position}, velocity: {velocity}, sleep_time: {self.sleep_time}")  # Debug parsed data
 
@@ -137,46 +211,12 @@ def listen(self,address,port):
 
         # Resume the game by setting the event
         print("Setting resume_game_event to continue the loop after receiving data.")
-        self.resume_game_event.set()
+
 
     except Exception as e:
         print(f"Error processing received data: {e}")
 
     received_data = None
-
-    # # Update the ball's state with the received data
-    # position = [int(received_data[2]), int(received_data[5])]
-    # velocity = [int(received_data[10:12].replace(",", "")), int(received_data[16:18].replace("]", ""))]
-    # print(f"Received position: {position}, velocity: {velocity}")
-    #
-    # # Set ball position and velocity
-    # self.ball.setposition(position)
-    # self.ball.setvelocity(velocity)
-    #
-    # # Resume the game by setting the event
-    # self.resume_game_event.set()
-    #
-    # received_data = None  # Reset received data after handling
-
-
-
-    # received_data = None
-    # while received_data is None:
-    #     self.listen = Listen.Server((address, port))
-    #     received_data = self.listen.WaitForConnection()
-    # print(received_data)
-    #
-    # # Update the ball's state with the received data
-    # position = [int(received_data[2]), int(received_data[5])]
-    # velocity = [int(received_data[10:12].replace(",","")),int(received_data[16:18].replace("]",""))]
-    # print(position, velocity)
-    #
-    # self.ball.setposition(position)
-    # self.ball.setvelocity(velocity)
-    # self.sleep_time = float(received_data[18:20])
-    # self.ball.move(self.paddle.paddle)
-    # received_data = None
-
 
 #Class for Multiplayer game right side
 class MPGameRight(Game):
@@ -185,63 +225,31 @@ class MPGameRight(Game):
 
     def mpball_loop_right(self):
         while not self.stop_threads:
-            self.resume_game_event.wait()
+            self.board.set_bg()  # Clear background
+            self.paddle.draw()  # Draw left paddle
+            self.ball.draw()  # Draw ball to avoid trails
+
 
             if self.ball.getposition()[0] == 0:
-                #self.ball.clear_pixel()  # Clear current position
+                self.ball.setxposition(0)  # set X to 0 before freezing
                 self.ball.frozen = True  # Freeze X position
-                #self.resume_game_event.clear()  # Pause loop on right Pi
+                self.ball.opposite_side = True  # Enable opposite side bouncing
 
-                # Prepare ball data to send
                 send_position = self.ball.getposition()
                 send_position[0] = 6  # Set to the far side for the left Pi
                 send_velocity = self.ball.getvelocity()
                 send_velocity[0] = -1  # Reverse the X direction
 
-                ball_data = [send_position, send_velocity, self.sleep_time]
+
+                ball_data = [send_position, send_velocity, self.sleep_time, self.ending]
                 print(f"Sending ball data from right to left: {ball_data}")
-                self.send = Send.Send(str(ball_data), (self.address, 1777))
+                self.send = Send.Send(str(ball_data), (self.localip, 1777))
+                listen(self, self.remoteip, 1888)
+                self.ball.frozen = False
+                self.ball.opposite_side = False  # Reset opposite side bouncing
 
-                # Wait for the ball to come back by blocking until data is received
-                listen(self, self.address2, 1888)
-                self.resume_game_event.set()  # Resume the loop after receiving data
-            else:
-                # Only update Y position while the ball is on the opposite side
-                self.ball.draw()  # Keep the ball drawn at its last X position
-            time.sleep(self.sleep_time)
-
-    # def mpball_loop_right(self):
-    #     while not self.stop_threads:
-    #         self.resume_game_event.wait()
-    #
-    #         # Debugging ball movement
-    #         print(f"Ball moving on right side: position={self.ball.getposition()}, velocity={self.ball.getvelocity()}")
-    #
-    #
-    #         # Condition for sending the ball to the left Pi
-    #         if self.ball.getposition()[0] == 0:
-    #             # self.ball.clear_pixel()  # Clear only the ball's pixel
-    #             # self.resume_game_event.clear()  # Pause the loop on the right Pi
-    #             send_position = self.ball.getposition()
-    #             send_position[0] = 6
-    #             send_velocity = self.ball.getvelocity()
-    #             send_velocity[0] = -1
-    #
-    #             ball_data = [send_position,send_velocity,self.sleep_time]
-    #
-    #             print(f"Sending ball data from right to left: {ball_data}")  # Debug sent data
-    #             # Send ball data to the other Pi
-    #             self.send = Send.Send(str(ball_data), (self.address, 1777))
-    #
-    #             # self.resume_game_event.clear()
-    #             #self.ball.setxposition(0)
-    #
-    #             # Wait for the ball to come back by blocking until data is received
-    #             listen(self, self.address2, 1888)
-    #             self.resume_game_event.set()  # Resume the loop after receiving data
-    #
-    #         time.sleep(self.sleep_time)
-    #         #return self.game_end()
+            time.sleep(0.05)
+            return Game.ball_loop(self)
 
 
 #Class for Multiplayer game left side
@@ -253,239 +261,89 @@ class MPGameLeft(Game):
 
     def mpball_loop_left(self):
         while not self.stop_threads:
-            self.resume_game_event.wait()
+            self.board.set_bg()  # Clear background
+            self.paddle.draw()  # Draw left paddle
+            self.ball.draw()  # Draw ball to avoid trails
+
+
 
             if self.ball.getposition()[0] == 7:
-                # self.ball.clear_pixel()  # Clear the ball's current pixel
+                self.ball.setxposition(7)  #set X to 7 before freezing
                 self.ball.frozen = True  # Freeze X position
-                # self.resume_game_event.clear()  # Pause the loop on the left Pi
+                self.ball.opposite_side = True  # Enable opposite side bouncing
 
-                # Prepare ball data to send
                 send_position = self.ball.getposition()
                 send_position[0] = 1  # Set to the far side for the right Pi
                 send_velocity = self.ball.getvelocity()
                 send_velocity[0] = 1  # Reverse the X direction
 
-                ball_data = [send_position, send_velocity, self.sleep_time]
+                ball_data = [send_position, send_velocity, self.sleep_time, self.ending]
                 print(f"Sending ball data from left to right: {ball_data}")
-                self.send = Send.Send(str(ball_data), (self.address2, 1888))
+                self.send = Send.Send(str(ball_data), (self.remoteip, 1888))
+                listen(self, self.localip, 1777)
+                self.ball.frozen = False
+                self.ball.opposite_side = False  # Reset opposite side bouncing after listening
 
-                # Wait for the ball to come back by blocking until data is received
-                listen(self, self.address, 1777)
-                self.resume_game_event.set()  # Resume the loop after receiving data
-            else:
-                # Only update Y position while the ball is on the opposite side
-                self.ball.draw()  # Keep the ball drawn at its last X position
+            time.sleep(0.05)
+            return Game.ball_loop_Left(self)
+
+    def ball_move(self):
+        while not self.stop_threads:
+            self.ball.move(self.paddle.paddle)
+
+            if self.ball.getposition()[0] == 1 and (self.paddle.paddle - 1) <= self.ball.getposition()[1] <= (
+                    self.paddle.paddle + 1):
+                if self.get_random_increment() == 1 and self.sleep_time > 0.1:
+                    self.sleep_time = round(self.sleep_time - 0.1, 1)
+                    print(self.sleep_time)
+
             time.sleep(self.sleep_time)
-
-    # def mpball_loop_left(self):
-    #     while not self.stop_threads:
-    #         self.resume_game_event.wait()
-    #
-    #         print(f"Ball moving on left side: position={self.ball.getposition()}, velocity={self.ball.getvelocity()}")
-    #
-    #         # Condition for sending the ball to the right Pi
-    #         if self.ball.getposition()[0] == 7:
-    #             #self.ball.clear_pixel()  # Clear only the ball's pixel
-    #             #self.resume_game_event.clear()  # Pause the loop on the left Pi
-    #             send_position = self.ball.getposition()
-    #             send_position[0] = 1  # Adjust to move it to the other side
-    #             send_velocity = self.ball.getvelocity()
-    #             send_velocity[0] = 1  # Reverse the X direction
-    #
-    #             ball_data = [send_position, send_velocity, self.sleep_time]
-    #
-    #             print(f"Sending ball data from left to right: {ball_data}")  # Debug sent data
-    #
-    #             # Send ball data to the right Pi
-    #             self.send = Send.Send(str(ball_data), (self.address2, 1888))
-    #
-    #             # Clear the event (pause the game loop)
-    #             print("Pausing the game loop on the left side (waiting for ball to return).")
-    #             #self.resume_game_event.clear()
-    #
-    #             # Wait for the ball to come back by blocking until data is received
-    #             listen(self, self.address, 1777)
-    #             self.resume_game_event.set()  # Resume the loop after receiving data
-    #
-    #         time.sleep(self.sleep_time)
-    #         #return self.game_end()
-
 
 
 def main():
+    # Initialize and run the menu
+    menu = Menu()
+    menu.run_menu()  # Select side and wait for connection synchronization
 
-    #Function to return game type
-    def game_type(response):
-        if response == "S":
-            return 0
-        elif response == "M":
-            response = input("Select Player (L for left -- R for right) ").upper()
-            if response == "L":
-                return 1
-            elif response == "R":
-                return 2
+    # Determine the game type based on the player's side
+    if menu.player_side == 'L':
+        print("Starting Multiplayer Game as Left Player")
+        game = MPGameLeft()  # Initialize left player multiplayer game
+    elif menu.player_side == 'R':
+        print("Starting Multiplayer Game as Right Player")
+        game = MPGameRight()  # Initialize right player multiplayer game
+    elif menu.player_side == 'S':
+        print("Starting Single Player Game")
+        game = Game()  # Initialize single-player game directly
 
+    # Configure the Sense HAT joystick to control the paddle
+    sense.stick.direction_up = game.paddle.move_up
+    sense.stick.direction_down = game.paddle.move_down
 
-    #Function to display countdown
-    def count_down():
-        white = (255,255,255)
-        three = [
-            (1, 1), (2, 1), (3, 1), (4, 1), (5, 2), (5, 3),
-            (3, 4), (4, 4), (5, 4), (5, 5), (5, 6), (1, 6), (2, 6), (3, 6),(4,6)
-        ]
-        two = [
-            (1, 1), (2, 1), (3, 1), (4, 1), (5, 1),  (5, 2), (5, 3),(4, 4),
-            (3, 4), (2, 4), (1, 4), (1, 5), (1, 6),(2, 6), (3, 6), (4, 6), (5, 6)
-        ]
-        one = [
-        (3, 1), (4, 1), (4, 2),  (4, 3),  (4, 4),  (4, 5), (4, 6)
-        ]
-        sense.clear()
-        for pixel in three:
-            sense.set_pixel(pixel[0], pixel[1], white)
-        time.sleep(1)
-        sense.clear()
-        for pixel in two:
-            sense.set_pixel(pixel[0], pixel[1], white)
-        time.sleep(1)
-        sense.clear()
-        for pixel in one:
-            sense.set_pixel(pixel[0], pixel[1], white)
-        time.sleep(1)
-        sense.clear()
+    # Set up game threads for game loop and ball movement
+    gamethread = threading.Thread(target=game.game_loop)
+    gamethread.start()
+    ballthread = threading.Thread(target=game.ball_move)
+    ballthread.start()
 
+    # Run game ending checks
+    while not game.stop_threads:
+        if menu.player_side == 'L':
+            game.ending = game.mpball_loop_left()
+        elif menu.player_side == 'R':
+            game.ending = game.mpball_loop_right()
+        elif menu.player_side == 'S':
+            game.ending = game.ball_loop()
 
-    #Ask player for game type
-    print("Welcome to Pi-Pong 2.0")
-    gametype = game_type(input("Which game type would you like to play? (S for Single or M for Multi): ").upper())
-
-
-    #Run
-    #Game Type: Single player
-    if gametype == 0:
-        #count_down()
-        game = Game()
-        sense.stick.direction_up = game.paddle.move_up
-        sense.stick.direction_down = game.paddle.move_down
-
-            # Run the game loop in a separate thread
-        ballthread = threading.Thread(target=game.ball_move)
-        ballthread.start()
-        gamethread = threading.Thread(target=game.game_loop)
-        gamethread.start()
-
-        while game.game_end() == 0:
-            result = game.ball_loop()
-
-            if result == 1:
-                game.stop_threads = True
-                ballthread.join()
-                game.game_win()
-            elif result == 2:
-                game.stop_threads = True
-                gamethread.join()
-                ballthread.join()
-                game.game_lose()
-
-
-    #Run
-    #Game Type: Multiplayer (Left side)
-    elif gametype == 1:  # Multiplayer left side
-        game = MPGameLeft()
-        sense.stick.direction_up = game.paddle.move_up
-        sense.stick.direction_down = game.paddle.move_down
-
-        # Start listening for the first ball data before starting the loop
-        print("Waiting for the first ball to arrive on the left side")  # Debug
-        listen(game, game.address, 1777)  # Listen for the first ball
-
-        # Now start the game loop after receiving the first ball
-        print("Starting the game loop after receiving the first ball")  # Debug
-        gamethread = threading.Thread(target=game.game_loop)
-        gamethread.start()
-
-        ballthread = threading.Thread(target=game.ball_move)
-        ballthread.start()
-
-        while game.game_end() == 0:
-            result = game.mpball_loop_left()
-            time.sleep(1)
-
-
-            if result == 1:
-                game.stop_threads = True
-                gamethread.join()
-                ballthread.join()
-                game.game_win()
-            elif result == 2:
-                game.stop_threads = True
-                gamethread.join()
-                ballthread.join()
-                game.game_lose()
-
-    # elif gametype == 1:
-    #     #count_down()
-    #     game = MPGameLeft()
-    #     sense.stick.direction_up = game.paddle.move_up
-    #     sense.stick.direction_down = game.paddle.move_down
-    #
-    #     # Run the game loop in a separate thread
-    #
-    #     print("Starting the game loop on the left side")  # Debug
-    #     gamethread = threading.Thread(target=game.mpball_loop_left)
-    #     gamethread.start()
-    #     ballthread = threading.Thread(target=game.ball_move)
-    #     ballthread.start()
-    #
-    #     while game.game_end() == 0:
-    #         #################################################################
-    #         result = game.mpball_loop_left()
-    #         print(game.ball.getvelocity(), game.ball.getposition())
-    #
-    #
-    #         if result == 1:
-    #             game.stop_threads = True
-    #             gamethread.join()
-    #             ballthread.join()
-    #             game.game_win()
-    #         elif result == 2:
-    #             game.stop_threads = True
-    #             gamethread.join()
-    #             ballthread.join()
-    #             game.game_lose()
-
-    #Run
-    #Game Type: Multiplayer (Right side)
-    elif gametype == 2:
-        #count_down()
-        game = MPGameRight()
-        sense.stick.direction_up = game.paddle.move_up
-        sense.stick.direction_down = game.paddle.move_down
-
-        # Run the game loop in a separate thread
-        gamethread = threading.Thread(target=game.game_loop)
-        gamethread.start()
-        ballthread = threading.Thread(target=game.ball_move)
-        ballthread.start()
-
-        while game.game_end() == 0:
-            result = game.mpball_loop_right()
-            print(game.ball.getvelocity(), game.ball.getposition())
-
-
-            if result == 1:
-                game.stop_threads = True
-                gamethread.join()
-                ballthread.join()
-                game.game_win()
-            elif result == 2:
-                game.stop_threads = True
-                gamethread.join()
-                ballthread.join()
-                game.game_lose()
-
-
+        # Handle game end conditions
+        if game.ending == 1:
+            game.stop_threads = True
+            gamethread.join()
+            ballthread.join()
+            game.game_win()
+        elif game.ending == 2:
+            game.stop_threads = True
+            gamethread.join()
+            ballthread.join()
+            game.game_lose()
 main()
-
-
