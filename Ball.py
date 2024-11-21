@@ -68,6 +68,9 @@ class Ball:
 class BallLeft(Ball):
     def __init__(self):
         super().__init__()
+        self.position = [6, 3]  # Starting position at x=6
+        self.velocity = [0, 1]  # Only vertical movement at start
+        self.frozen = True  # Start frozen
 
     def bounce_opposite_side(self):
         if self.opposite_side:
@@ -77,27 +80,12 @@ class BallLeft(Ball):
                 self.velocity[1] = -self.velocity[1]
 
     def move(self, paddle_position):
-        if not self.frozen:
-            # Move the ball in x direction
-            self.position[0] += self.velocity[0]
-
-            # Check for wall collisions on x-axis
-            if self.position[0] >= 7 or self.position[0] <= 0:
-                self.velocity[0] = -self.velocity[0]
-
-            # Move the ball in y direction
+        if self.frozen:
+            # When frozen, only move in Y direction and stay at x=6
+            self.position[0] = 6  # Force position to stay at x=6
             self.position[1] += self.velocity[1]
-
-            # Check for wall collisions on y-axis
             if self.position[1] >= 7 or self.position[1] <= 0:
                 self.velocity[1] = -self.velocity[1]
-
-            # Left paddle collision detection
-            if self.position[0] == 1:
-                if (paddle_position - 1) <= self.position[1] <= (paddle_position + 1):
-                    self.velocity[0] = -self.velocity[0]
-                elif self.position[1] == (paddle_position + 2) or self.position[1] == (paddle_position - 2):
-                    self.velocity[0] = -self.velocity[0]
-                    self.velocity[1] = -self.velocity[1]
         else:
-            self.bounce_opposite_side()  # Bounce on the far side if frozen
+            # When unfrozen, use normal movement
+            super().move(paddle_position)
